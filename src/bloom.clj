@@ -23,7 +23,12 @@ and number of elements N
   "Create a Bloom filter with bit size M, number of (expected)
 elements N and number of hash functions K. K can be calculated."
   ([m n k1]
-     {:m m :n n :k k1 :f 0})
+     (let [bf (atom {})]
+       (swap! bf assoc :m m)
+       (swap! bf assoc :n n)
+       (swap! bf assoc :k k1)
+       (swap! bf assoc :f 0)
+       bf))
   ([m n] (create-bloom m n (optimal-k m n))))
 
 (defn bytes->num [bs]
@@ -43,14 +48,15 @@ elements N and number of hash functions K. K can be calculated."
 
 (defn add [bloom x]
   (let [s (pr-str x)
-	{:keys [m k f]} bloom
+	{:keys [m k f]} @bloom
 	f1 (reduce #(bit-set %1 %2)
 		   f (indexes s m k))]
-    (assoc bloom :f f1)))
+    (swap! bloom assoc :f f1))
+  bloom)
 
 (defn contains? [bloom x]
   (let [s (pr-str x)
-	{:keys [m k f]} bloom]
+	{:keys [m k f]} @bloom]
     (every? #(bit-test f %) (indexes s m k))))
 
 (defn benchmark []
