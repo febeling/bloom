@@ -56,13 +56,11 @@ elements N and number of hash functions K. K can be calculated."
 
 (defn add [bloom x]
   (let [s (pr-str x)
-	{:keys [m k f]} @bloom]
-    (loop [idx (indexes s m k)
-	   f0 f]
-      (let [f1 (bit-set f0 (first idx))]
-	(if-not (next idx)
-	  (swap! bloom assoc :f f1)
-	  (recur (rest idx) f1))))))
+	{:keys [m k f]} @bloom
+	f1 (reduce #(bit-set %1 %2)
+		   f (indexes s m k))]
+    (swap! bloom assoc :f f1))
+  bloom)
 
 (defn contains? [bloom x]
   (let [s (pr-str x)

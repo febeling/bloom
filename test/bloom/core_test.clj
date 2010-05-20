@@ -49,11 +49,18 @@
 
 (deftest add-test
   (let [b (create-bloom 16 4 1)]
-    (add b "a") ;; flips bit 4
+    (add b "a")
     (is (= "10000" (Integer/toString (:f @b) 2))))
   (let [b (create-bloom 16 4 3)]
-    (add b "b") ;; flips bits 0, 2 and 14
+    (add b "b")
     (is (= "100000000000101" (Integer/toString (:f @b) 2)))))
+
+(deftest add-multiple-test
+  (let [b (create-bloom 48 0 3)]
+    (reduce add b [1 2 3 4 5])
+    (is (= 21200912795920 (:f @b)))
+    (is (every? identity (map #(contains? b %) [1 2 3 4 5])))
+    (is (not-any? identity (map #(contains? b %) [6 7 8 9 10])))))
 
 (deftest contains?-test
   (let [b (create-bloom 64 8 4)]
