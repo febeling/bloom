@@ -1,4 +1,4 @@
-(ns bloom.core
+(ns bloom
   (:import java.security.MessageDigest)
   (:import java.nio.charset.Charset)
   (:refer-clojure :exclude [hash contains?]))

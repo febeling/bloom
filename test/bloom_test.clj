@@ -1,5 +1,5 @@
-(ns bloom.core-test
-  (:use [bloom.core] :reload-all)
+(ns bloom-test
+  (:use [bloom] :reload-all)
   (:use [clojure.test])
   (:refer-clojure :exclude [hash contains?]))
 
