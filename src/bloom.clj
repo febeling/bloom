@@ -1,6 +1,7 @@
 (ns bloom
   (:import java.security.MessageDigest)
   (:import java.nio.charset.Charset)
+  (:import java.util.BitSet)
   (:refer-clojure :exclude [hash contains?]))
 
 (def message-digest (MessageDigest/getInstance "SHA1"))
@@ -23,12 +24,7 @@ and number of elements N
   "Create a Bloom filter with bit size M, number of (expected)
 elements N and number of hash functions K. K can be calculated."
   ([m n k1]
-     (let [bf (atom {})]
-       (swap! bf assoc :m m)
-       (swap! bf assoc :n n)
-       (swap! bf assoc :k k1)
-       (swap! bf assoc :f 0)
-       bf))
+     (atom {:m m :n n :k k1 :f (BitSet. m)}))
   ([m n] (create-bloom m n (optimal-k m n))))
 
 (defn bytes->num [bs]
@@ -46,18 +42,21 @@ elements N and number of hash functions K. K can be calculated."
        (map hash)
        (map #(mod % m))))
 
-(defn add [bloom x]
+(defn- add* [bloom x]
   (let [s (pr-str x)
-	{:keys [m k f]} @bloom
-	f1 (reduce #(bit-set %1 %2)
-		   f (indexes s m k))]
-    (swap! bloom assoc :f f1))
+	{:keys [m k f]} bloom]
+    (reduce (fn [bs n] (.set bs n) bs)
+	    f (indexes s m k))
+    bloom))
+
+(defn add [bloom x]
+  (swap! bloom add* x)
   bloom)
 
 (defn contains? [bloom x]
   (let [s (pr-str x)
 	{:keys [m k f]} @bloom]
-    (every? #(bit-test f %) (indexes s m k))))
+    (every? #(.get f %) (indexes s m k))))
 
 (defn benchmark []
   ;; Inserting 1 mio. entries into a reasonably sized bloom filter

@@ -1,4 +1,5 @@
 (ns bloom-test
+  (:import java.util.BitSet)
   (:use [bloom] :reload-all)
   (:use [clojure.test])
   (:refer-clojure :exclude [hash contains?]))
@@ -19,9 +20,15 @@
        8 11 1
        8 12 1))
 
+(defn bitset [& more]
+  (let [bs (BitSet.)]
+    (doseq [n more]
+      (.set bs n))
+    bs))
+
 (deftest create-bloom-test
-  (is (= {:m 1 :n 2 :k 3 :f 0} @(create-bloom 1 2 3)))
-  (is (= {:m 100 :n 10 :k 7 :f 0} @(create-bloom 100 10))))
+  (is (= {:m 1 :n 2 :k 3 :f (bitset)} @(create-bloom 1 2 3)))
+  (is (= {:m 100 :n 10 :k 7 :f (bitset)} @(create-bloom 100 10))))
 
 (deftest bytes->num-test
   (are [x y] (= x (Long/toString (bytes->num (byte-array (map byte y))) 2))
@@ -50,15 +57,15 @@
 (deftest add-test
   (let [b (create-bloom 16 4 1)]
     (add b "a")
-    (is (= "10000" (Integer/toString (:f @b) 2))))
+    (is (= (bitset 4) (:f @b))))
   (let [b (create-bloom 16 4 3)]
     (add b "b")
-    (is (= "100000000000101" (Integer/toString (:f @b) 2)))))
+    (is (= (bitset 0 2 14) (:f @b)))))
 
 (deftest add-multiple-test
   (let [b (create-bloom 48 0 3)]
     (reduce add b [1 2 3 4 5])
-    (is (= 21200912795920 (:f @b)))
+    (is (= "{4, 8, 11, 14, 21, 22, 23, 27, 28, 29, 35, 38, 40, 41, 44}" (str (:f @b))))
     (is (every? identity (map #(contains? b %) [1 2 3 4 5])))
     (is (not-any? identity (map #(contains? b %) [6 7 8 9 10])))))
 
