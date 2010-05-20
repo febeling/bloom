@@ -20,15 +20,13 @@
        8 11 1
        8 12 1))
 
-(defn bitset [& more]
-  (let [bs (BitSet.)]
-    (doseq [n more]
-      (.set bs n))
-    bs))
-
 (deftest create-bloom-test
   (is (= {:m 1 :n 2 :k 3 :f (bitset)} @(create-bloom 1 2 3)))
   (is (= {:m 100 :n 10 :k 7 :f (bitset)} @(create-bloom 100 10))))
+
+(deftest bitset->num-test
+  (is (= "11110000" (Integer/toString (bitset->num (bitset 4 5 6 7)) 2)))
+  (is (= "10101010" (Integer/toString (bitset->num (bitset 1 3 5 7)) 2))))
 
 (deftest bytes->num-test
   (are [x y] (= x (Long/toString (bytes->num (byte-array (map byte y))) 2))
