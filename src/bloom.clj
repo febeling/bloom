@@ -19,14 +19,6 @@ and number of elements N
       (* (Math/log 2.0))
       (Math/round)))
 
-;; (defn optimal-m
-;;   "Calculate the optimal bit size M for a number of elements N and a
-;; false-positive probability of P"
-;;   [n p]
-;;   (Math/round (- 
-;; 	       (/ (* n (Math/log p))
-;; 		  (Math/pow (Math/log 2.0) 2.0)))))
-
 (defn create-bloom
   "Create a Bloom filter with bit size M, number of (expected)
 elements N and number of hash functions K. K can be calculated."
