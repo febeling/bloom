@@ -4,7 +4,7 @@
   (:use [clojure.test])
   (:refer-clojure :exclude [hash contains?]))
 
-(deftest k-test
+(deftest optimal-k-test
   ;; Expectations take from:
   ;; http://code.google.com/p/java-bloomfilter/source/browse/trunk/test/com/skjegstad/utils/BloomFilterTest.java
   (are [k m n] (= k (optimal-k m n))
