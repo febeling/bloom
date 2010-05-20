@@ -52,3 +52,16 @@ elements N and number of hash functions K. K can be calculated."
   (let [s (pr-str x)
 	{:keys [m k f]} bloom]
     (every? #(bit-test f %) (indexes s m k))))
+
+(defn benchmark []
+  ;; Inserting 1 mio. entries into a reasonably sized bloom filter
+  ;; and retrieving them with a hit rate of 0.05. (Error rate of 0.1%)
+  (println "Insert 100,000 entries")
+  (let [n 100000
+	m (* n 10)
+	bt (create-bloom m n)
+	bt1 (time (reduce add bt (range n)))]
+    (println "Retrieving 100,000 entries")
+    (let [lim (/ n 0.05)] ;; hit rate 0.05
+      (time (doseq [x (range n)]
+	      (contains? bt1 (Math/round (rand lim))))))))
