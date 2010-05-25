@@ -50,6 +50,25 @@
 	     "1000000010000011" (abit-set ba 15)
 	     "100000001000000010000011" (abit-set ba 23))))
 
+(deftest abit-test-test
+  (let [ba (-> (make-array Byte/TYPE 2)
+	       (abit-set 0)
+	       (abit-set 2)
+	       (abit-set 4)
+	       (abit-set 8)
+	       (abit-set 10))]
+	(are [x y] (is (= x (abit-test ba y)))
+	     true 0
+ 	     true 2
+	     false 1
+ 	     true 4
+ 	     true 8
+ 	     true 10
+ 	     false 3
+ 	     false 5
+ 	     false 7
+ 	     false 9)))
+
 (deftest hash-test
   (are [x s] (= x (hash s))
        975987071262755080377722350727279193143145743181  "hello"

@@ -42,14 +42,25 @@ elements N and number of hash functions K. K can be calculated."
 	(recur (inc h) (bit-set r h))
 	r))))
 
+(defn abit-array-pos [byte-array i]
+  (dec (- (alength byte-array) (int (/ i 8)))))
+
+(defn abit-bit-pos [byte-array i]
+  (rem i 8))
+
 (defn abit-set [byte-array i]
-  (let [len (alength byte-array)
-	apos (dec (- len (int (/ i 8))))
-	bpos (rem i 8)]
-    (aset-byte byte-array apos
+  (let [apos (abit-array-pos byte-array i)
+	bpos (abit-bit-pos byte-array i)]
+    (aset-byte byte-array
+	       apos
 	       (-> byte-array (aget apos) (bit-set bpos) byte))
     byte-array))
 
+(defn abit-test [byte-array i]
+  (let [apos (abit-array-pos byte-array i)
+	bpos (abit-bit-pos byte-array i)]
+    (bit-test (aget byte-array apos) bpos)))
+    
 (defn bytes->num [bs]
   (->> bs
        (map #(bit-and 0xff %))
