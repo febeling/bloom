@@ -1,7 +1,6 @@
 (ns bloom
   (:import java.security.MessageDigest)
   (:import java.nio.charset.Charset)
-  (:import java.util.BitSet)
   (:refer-clojure :exclude [hash contains?]))
 
 (def message-digest (MessageDigest/getInstance "SHA1"))
@@ -19,28 +18,15 @@ and number of elements N
   (-> m
       double
       (/ n)
-      (* (Math/log 2.0))
+      #^Double (* (Math/log 2.0))
       (Math/round)))
 
 (defn create-bloom
   "Create a Bloom filter with bit size M, number of (expected)
 elements N and number of hash functions K. K can be calculated."
   ([m n k1]
-     (atom {:m m :n n :k k1 :f (BitSet. m)}))
+     (atom {:m m :n n :k k1 :f (make-array Byte/TYPE m)}))
   ([m n] (create-bloom m n (optimal-k m n))))
-
-(defn bitset [& more]
-  (let [bs (BitSet.)]
-    (doseq [n more]
-      (.set bs n))
-    bs))
-
-(defn bitset->num [bitset]
-  (loop [i 0 r 0]
-    (let [h (.nextSetBit #^BitSet bitset i)]
-      (if (not (= -1 h))
-	(recur (inc h) (bit-set r h))
-	r))))
 
 (defn abit-array-pos [byte-array i]
   (dec (- (alength byte-array) (int (/ i 8)))))
@@ -53,13 +39,13 @@ elements N and number of hash functions K. K can be calculated."
 	bpos (abit-bit-pos byte-array i)]
     (aset-byte byte-array
 	       apos
-	       (-> byte-array (aget apos) (bit-set bpos) byte))
+	       (-> #^bytes byte-array (aget #^Integer apos) (bit-set bpos) byte))
     byte-array))
 
 (defn abit-test [byte-array i]
   (let [apos (abit-array-pos byte-array i)
 	bpos (abit-bit-pos byte-array i)]
-    (bit-test (aget byte-array apos) bpos)))
+    (bit-test (aget #^bytes byte-array #^Integer apos) bpos)))
     
 (defn bytes->num [bs]
   (->> bs
@@ -79,7 +65,7 @@ elements N and number of hash functions K. K can be calculated."
 (defn- add* [bloom x]
   (let [s (pr-str x)
 	{:keys [m k f]} bloom]
-    (reduce (fn [bs n] (.set #^BitSet bs n) bs)
+    (reduce (fn [bs n] (abit-set bs n) bs)
 	    f (indexes s m k))
     bloom))
 
@@ -90,7 +76,7 @@ elements N and number of hash functions K. K can be calculated."
 (defn contains? [bloom x]
   (let [s (pr-str x)
 	{:keys [m k f]} @bloom]
-    (every? #(.get #^BitSet f %) (indexes s m k))))
+    (every? #(abit-test f %) (indexes s m k))))
 
 (defn benchmark []
   ;; Inserting 1 mio. entries into a reasonably sized bloom filter
