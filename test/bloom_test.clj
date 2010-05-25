@@ -28,14 +28,27 @@
   (is (= "11110000" (Integer/toString (bitset->num (bitset 4 5 6 7)) 2)))
   (is (= "10101010" (Integer/toString (bitset->num (bitset 1 3 5 7)) 2))))
 
+(defn bit-str [bs]
+  (Long/toString (bytes->num (byte-array (map byte bs))) 2))
+
 (deftest bytes->num-test
-  (are [x y] (= x (Long/toString (bytes->num (byte-array (map byte y))) 2))
+  (are [x y] (= x (bit-str y))
        "0" [0]
        "11111111" [255]
        "1111111100000000" [255 0]
        "11110000" [240]
        "1111" [15]
        "111111110000000011110000111111110000111100000000" [255 0 240 255 15 0]))
+
+(deftest abit-set-test
+  (let [ba (make-array Byte/TYPE 3)]
+	(are [x y] (= x (bit-str y))
+	     "0" ba
+	     "1" (abit-set ba 0)
+	     "11" (abit-set ba 1)
+	     "10000011" (abit-set ba 7)
+	     "1000000010000011" (abit-set ba 15)
+	     "100000001000000010000011" (abit-set ba 23))))
 
 (deftest hash-test
   (are [x s] (= x (hash s))
