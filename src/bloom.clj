@@ -25,12 +25,11 @@ and number of elements N
 (defn byte-size [bits]
   (int (Math/ceil (float (/ bits 8)))))
 
-(defn create-bloom
+(defn make-bloom
   "Create a Bloom filter with bit size M, number of (expected)
 elements N and number of hash functions K. K can be calculated."
-  ([m n k1]
-     (atom {:m m :n n :k k1 :f (make-array Byte/TYPE (byte-size m))}))
-  ([m n] (create-bloom m n (optimal-k m n))))
+  [m k]
+  (atom {:m m :k k :f (make-array Byte/TYPE (byte-size m))}))
 
 (defn abit-array-pos [byte-array i]
   (dec (- (alength byte-array) (int (/ i 8)))))

@@ -24,12 +24,11 @@
   (is (= 1 (byte-size 8)))
   (is (= 2 (byte-size 9))))
 
-(deftest create-bloom-test
-  (let [bf @(create-bloom 100 10)]
+(deftest make-bloom-test
+  (let [bf @(make-bloom 100 7)]
     (is (= 100 (:m bf)))
-    (is (= 10 (:n bf)))
     (is (= 7 (:k bf)))
-    (is (=  (alength (:f bf))))))
+    (is (= 13 (alength (:f bf))))))
 
 (defn bit-str [bs]
   (Long/toString (bytes->num (byte-array (map byte bs))) 2))
@@ -88,22 +87,22 @@
     (is (= k (count (indexes "x" m k))))))
 
 (deftest add-test
-  (let [b (create-bloom 16 4 1)]
+  (let [b (make-bloom 16 1)]
     (add b "a")
     (is (= "10000" (bit-str (:f @b)))))
-  (let [b (create-bloom 16 4 3)]
+  (let [b (make-bloom 16 3)]
     (add b "b")
     (is (= "100000000000101" (bit-str (:f @b))))))
 
 (deftest add-multiple-test
-  (let [b (create-bloom 48 0 3)]
+  (let [b (make-bloom 48 3)]
     (reduce add b [1 2 3 4 5])
     (is (= "100110100100000111000111000000100100100010000" (bit-str (:f @b))))
     (is (every? identity (map #(contains? b %) [1 2 3 4 5])))
     (is (not-any? identity (map #(contains? b %) [6 7 8 9 10])))))
 
 (deftest contains?-test
-  (let [b (create-bloom 64 8 4)]
+  (let [b (make-bloom 64 4)]
     (add b "a")
     (add b "b")
     (add b "c")
@@ -115,40 +114,38 @@
     (is (not (contains? b "f")))))
 
 (deftest serialize-test
-  (let [bf (create-bloom 32 0 5)]
-    (is (= "{:m 32, :n 0, :k 5, :f [0 0 0 0]}" (serialize bf)))))
+  (let [bf (make-bloom 32 5)]
+    (is (= "{:m 32, :k 5, :f [0 0 0 0]}" (serialize bf)))))
 
 (deftest deserialize-test
-  (let [s "{:m 32, :n 0, :k 5, :f [0 0 0 0]}"
+  (let [s "{:m 32, :k 5, :f [0 0 0 0]}"
 	bf @(deserialize s)]
     (is (= 32 (:m bf)))
-    (is (= 0 (:n bf)))
     (is (= 5 (:k bf)))
     (is (= 4 (count (:f bf))))
     (is (instance? Byte (first (:f bf))))))
 
 (deftest serialize-deserialize-test
-  (let [bf (create-bloom 1000000 0 5)
+  (let [bf (make-bloom 1000000 5)
 	_ (-> bf (add 1) (add 2) (add 3) (add 4))
 	bf-serialized (deserialize (serialize bf))]
     (is (= (:m @bf) (:m @bf-serialized)))
-    (is (= (:n @bf) (:n @bf-serialized)))
     (is (= (:k @bf) (:k @bf-serialized)))
     (is (= (vec (:f @bf)) (vec (:f @bf-serialized))))))
 
 (deftest match?-test
-  (is (match? (create-bloom 32 1 5) (create-bloom 32 2 5)))
-  (is (not (match? (create-bloom 32 1 5) (create-bloom 32 1 3))))
-  (is (not (match? (create-bloom 16 1 5) (create-bloom 32 1 5)))))
+  (is (match? (make-bloom 32 5) (make-bloom 32 5)))
+  (is (not (match? (make-bloom 32 5) (make-bloom 32 3))))
+  (is (not (match? (make-bloom 16 5) (make-bloom 32 5)))))
 
 (deftest union-test
-  (testing "union only mathing bloom filter"
-    (let [a (create-bloom 32 1)
-	  b (create-bloom 64 1)]
+  (testing "union only matching bloom filter"
+    (let [a (make-bloom 32 4)
+	  b (make-bloom 64 4)]
       (is (thrown? Exception (union a b)))))
   (testing "remember elements from both sets"
-    (let [a (create-bloom 32 1)
-	  b (create-bloom 32 1)]
+    (let [a (make-bloom 32 4)
+	  b (make-bloom 32 4)]
       (add a 1)
       (add b 2)
       (let [u (union a b)]
