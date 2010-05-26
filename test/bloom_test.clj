@@ -135,3 +135,23 @@
     (is (= (:n @bf) (:n @bf-serialized)))
     (is (= (:k @bf) (:k @bf-serialized)))
     (is (= (vec (:f @bf)) (vec (:f @bf-serialized))))))
+
+(deftest match?-test
+  (is (match? (create-bloom 32 1 5) (create-bloom 32 2 5)))
+  (is (not (match? (create-bloom 32 1 5) (create-bloom 32 1 3))))
+  (is (not (match? (create-bloom 16 1 5) (create-bloom 32 1 5)))))
+
+(deftest union-test
+  (testing "union only mathing bloom filter"
+    (let [a (create-bloom 32 1)
+	  b (create-bloom 64 1)]
+      (is (thrown? Exception (union a b)))))
+  (testing "remember elements from both sets"
+    (let [a (create-bloom 32 1)
+	  b (create-bloom 32 1)]
+      (add a 1)
+      (add b 2)
+      (let [u (union a b)]
+	(is (contains? u 1))
+	(is (contains? u 2))
+	(is (not (contains? u 3)))))))

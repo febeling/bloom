@@ -1,6 +1,7 @@
 (ns bloom
   (:import java.security.MessageDigest)
   (:import java.nio.charset.Charset)
+  (:use [clojure.contrib.except :only [throw-if-not]])
   (:refer-clojure :exclude [hash contains?]))
 
 (def message-digest (MessageDigest/getInstance "SHA1"))
@@ -89,3 +90,15 @@ elements N and number of hash functions K. K can be calculated."
   (let [bloom (read-string s)
 	f (into-array Byte/TYPE (map byte (:f bloom)))]
     (atom (assoc bloom :f f))))
+
+(defn match? [a b]
+  (and (= (:m @a) (:m @b)) (= (:k @a) (:k @b))))
+
+(defn union [a b & more]
+  (throw-if-not (match? a b) "Bloom filters different, cannot union")
+  (let [u (make-array Byte/TYPE (alength (:f @a)))
+	a-bs (:f @a)
+	b-bs (:f @b)]
+    (doseq [n (range (alength (:f @a)))]
+      (aset-byte u n (bit-or (aget a-bs n) (aget b-bs n))))
+    (atom (assoc @a :f u))))
