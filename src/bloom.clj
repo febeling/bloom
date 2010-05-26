@@ -49,7 +49,7 @@ elements N and number of hash functions K. K can be calculated."
   (let [apos (abit-array-pos byte-array i)
 	bpos (abit-bit-pos byte-array i)]
     (bit-test (aget #^bytes byte-array #^Integer apos) bpos)))
-    
+
 (defn bytes->num [bs]
   (->> bs
        (map #(bit-and 0xff %))
