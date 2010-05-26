@@ -1,7 +1,7 @@
 (ns bloom-test
   (:use [bloom] :reload-all)
   (:use [clojure.test])
-  (:refer-clojure :exclude [hash contains?]))
+  (:refer-clojure :exclude [contains?]))
 
 (deftest optimal-k-test
   ;; Expectations take from:
@@ -19,12 +19,17 @@
        8 11 1
        8 12 1))
 
+(deftest byte-size-test
+  (is (= 1 (byte-size 1)))
+  (is (= 1 (byte-size 8)))
+  (is (= 2 (byte-size 9))))
+
 (deftest create-bloom-test
   (let [bf @(create-bloom 100 10)]
     (is (= 100 (:m bf)))
     (is (= 10 (:n bf)))
     (is (= 7 (:k bf)))
-    (is (= (:m bf) (alength (:f bf))))))
+    (is (=  (alength (:f bf))))))
 
 (defn bit-str [bs]
   (Long/toString (bytes->num (byte-array (map byte bs))) 2))
@@ -67,8 +72,8 @@
  	     false 7
  	     false 9)))
 
-(deftest hash-test
-  (are [x s] (= x (hash s))
+(deftest hashnum-test
+  (are [x s] (= x (hashnum s))
        975987071262755080377722350727279193143145743181  "hello"
        708652540093010131229728076251103780790279585603  "world"
        1245845410931227995499360226027473197403882391305 ""))
@@ -108,3 +113,25 @@
     (is (not (contains? b "d")))
     (is (not (contains? b "e")))
     (is (not (contains? b "f")))))
+
+(deftest serialize-test
+  (let [bf (create-bloom 32 0 5)]
+    (is (= "{:m 32, :n 0, :k 5, :f [0 0 0 0]}" (serialize bf)))))
+
+(deftest deserialize-test
+  (let [s "{:m 32, :n 0, :k 5, :f [0 0 0 0]}"
+	bf @(deserialize s)]
+    (is (= 32 (:m bf)))
+    (is (= 0 (:n bf)))
+    (is (= 5 (:k bf)))
+    (is (= 4 (count (:f bf))))
+    (is (instance? Byte (first (:f bf))))))
+
+(deftest serialize-deserialize-test
+  (let [bf (create-bloom 1000000 0 5)
+	_ (-> bf (add 1) (add 2) (add 3) (add 4))
+	bf-serialized (deserialize (serialize bf))]
+    (is (= (:m @bf) (:m @bf-serialized)))
+    (is (= (:n @bf) (:n @bf-serialized)))
+    (is (= (:k @bf) (:k @bf-serialized)))
+    (is (= (vec (:f @bf)) (vec (:f @bf-serialized))))))

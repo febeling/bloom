@@ -21,11 +21,14 @@ and number of elements N
       #^Double (* (Math/log 2.0))
       (Math/round)))
 
+(defn byte-size [bits]
+  (int (Math/ceil (float (/ bits 8)))))
+
 (defn create-bloom
   "Create a Bloom filter with bit size M, number of (expected)
 elements N and number of hash functions K. K can be calculated."
   ([m n k1]
-     (atom {:m m :n n :k k1 :f (make-array Byte/TYPE m)}))
+     (atom {:m m :n n :k k1 :f (make-array Byte/TYPE (byte-size m))}))
   ([m n] (create-bloom m n (optimal-k m n))))
 
 (defn abit-array-pos [byte-array i]
@@ -52,14 +55,14 @@ elements N and number of hash functions K. K can be calculated."
        (map #(bit-and 0xff %))
        (reduce #(bit-or (bit-shift-left %1 8) %2) 0)))
 
-(defn hash [x]
+(defn hashnum [x]
   (let [bs (.getBytes #^String x charset)]
     (bytes->num (. #^MessageDigest message-digest digest bs))))
 
 (defn indexes [s m k]
   (->> (range k)
        (map #(str s %))
-       (map hash)
+       (map hashnum)
        (map #(mod % m))))
 
 (defn- add* [bloom x]
@@ -78,18 +81,11 @@ elements N and number of hash functions K. K can be calculated."
 	{:keys [m k f]} @bloom]
     (every? #(abit-test f %) (indexes s m k))))
 
-(defn benchmark []
-  ;; Inserting 1 mio. entries into a reasonably sized bloom filter
-  ;; and retrieving them with a hit rate of 0.05. (Error rate of 0.1%)
-  (let [n 100000
-	_ (println (format "Insert %,d entries" n))
-	m (* n 10)
-	bt (create-bloom m n)]
-    (time (reduce add bt (range n)))
-    (println (format "Retrieving %,d entries" n))
-    (let [lim (/ n 0.05)] ;; hit rate 0.05
-      (time (doseq [x (range n)]
-	      (contains? bt (Math/round (rand lim))))))
-    (let [s (time (str (:f @bt)))]
-      (println (format "Serialized size: %,d" (.length s))))))
+(defn serialize [bloom]
+  (let [num (into [] (:f @bloom))]
+    (pr-str (assoc @bloom :f num))))
 
+(defn deserialize [s]
+  (let [bloom (read-string s)
+	f (into-array Byte/TYPE (map byte (:f bloom)))]
+    (atom (assoc bloom :f f))))
