@@ -2,7 +2,10 @@
   (:import java.security.MessageDigest)
   (:import java.nio.charset.Charset)
   (:use [clojure.contrib.except :only [throw-if-not]])
-  (:refer-clojure :exclude [hash contains?]))
+  (:refer-clojure :exclude [contains?]))
+
+;; TODO (intersection a b)
+;; TODO (optimized-bloom element-count error-probability)
 
 (def message-digest (MessageDigest/getInstance "SHA1"))
 
