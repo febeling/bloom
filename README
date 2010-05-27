@@ -1,0 +1,58 @@
+# bloom
+
+This is a Bloom filter implementation in Clojure. A Bloom filter is a
+space-efficient set algorithm, which allows false positives. The rate
+of false positives can be contolled of the number of elements is known
+in advance.
+
+
+## Usage
+
+user=> (require 'bloom)
+nil
+user=> (def b (bloom/make-bloom 10000000 7))
+#'user/b
+user=> (bloom/add b "Tiger")
+#<Atom@65493102: {:m 10000000, :k 7, :f #<byte[] [B@62770d2e>}>
+user=> (bloom/contains? b "Tiger")
+true
+user=> (bloom/contains? b "Dragon")
+false
+
+To create a bloom filter, you have to pick a size for the bit field to
+use, and the number K of hash functions (bits) calculated from each
+inserted object.
+
+A number of 9.8 bits/element results in an error rate of
+approx. 1%. This error rate drops by factor 10 with every 4.8 bit
+added per element (provided an optimal K is chosen). See [1].
+
+For discussion of reasonable values for bitfield size and K, see
+[2]. ("m/n" is the number of bit per element.)
+
+You can calculate the optimal K value with 'bloom/optimal-k.
+
+
+## Installation
+
+To use this library from a Leiningen project, put the following line
+into your project.clj:
+
+  [bloom "0.4.0-SNAPSHOT"]
+
+Then run 
+
+  lein deps
+
+## License
+
+Eclipse license. See epl-v10.html.
+
+## References
+
+1 http://en.wikipedia.org/wiki/Bloom_filter#Space_and_time_advantages
+2 http://pages.cs.wisc.edu/~cao/papers/summary-cache/node8.html
+3 http://blog.locut.us/2008/01/12/a-decent-stand-alone-java-bloom-filter-implementation/
+4 http://code.google.com/p/java-bloomfilter/
+5 http://www.fatvat.co.uk/2009/02/bloom-filters.html
+6 http://svn.apache.org/viewvc/hadoop/common/branches/branch-0.20/src/core/org/apache/hadoop/util/bloom/BloomFilter.java?revision=787134&view=markup
