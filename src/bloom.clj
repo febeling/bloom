@@ -86,14 +86,18 @@ elements N and number of hash functions K. K can be calculated."
 	{:keys [m k f]} @bloom]
     (every? #(abit-test f %) (indexes s m k))))
 
+(defn pack [bloom]
+  (assoc @bloom :f (into [] (:f @bloom))))
+
+(defn unpack [bloom]
+  (let [f (into-array Byte/TYPE (map byte (:f bloom)))]
+    (assoc bloom :f f)))
+
 (defn serialize [bloom]
-  (let [num (into [] (:f @bloom))]
-    (pr-str (assoc @bloom :f num))))
+  (pr-str (pack bloom)))
 
 (defn deserialize [s]
-  (let [bloom (read-string s)
-	f (into-array Byte/TYPE (map byte (:f bloom)))]
-    (atom (assoc bloom :f f))))
+  (atom (unpack (read-string s))))
 
 (defn match? [a b]
   (and (= (:m @a) (:m @b)) (= (:k @a) (:k @b))))
