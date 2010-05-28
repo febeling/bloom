@@ -6,6 +6,7 @@
 
 ;; TODO (intersection a b)
 ;; TODO (make-optimized-bloom element-count error-probability)
+;; TODO add element count
 
 (def message-digest (MessageDigest/getInstance "SHA1"))
 
@@ -76,7 +77,7 @@ elements N and number of hash functions K. K can be calculated."
     bloom))
 
 (defn add [bloom x]
-  "Change BLOOM to contain X and return it.."
+  "Change BLOOM to contain X and return it."
   (swap! bloom add* x)
   bloom)
 
