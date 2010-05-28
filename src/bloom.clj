@@ -99,9 +99,12 @@ elements N and number of hash functions K. K can be calculated."
 
 (defn union [a b & more]
   (throw-if-not (match? a b) "Bloom filters different, cannot union")
-  (let [u (make-array Byte/TYPE (alength (:f @a)))
+  (let [u-bs (make-array Byte/TYPE (alength (:f @a)))
 	a-bs (:f @a)
 	b-bs (:f @b)]
     (doseq [n (range (alength (:f @a)))]
-      (aset-byte u n (bit-or (aget a-bs n) (aget b-bs n))))
-    (atom (assoc @a :f u))))
+      (aset-byte u-bs n (bit-or (aget a-bs n) (aget b-bs n))))
+    (let [u (atom (assoc @a :f u-bs))]
+      (if (empty? more)
+	u
+	(recur u (first more) (rest more))))))

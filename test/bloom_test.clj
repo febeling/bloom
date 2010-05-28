@@ -139,10 +139,14 @@
   (is (not (match? (make-bloom 16 5) (make-bloom 32 5)))))
 
 (deftest union-test
-  (testing "union only matching bloom filter"
+  (testing "do union only matching bloom filter"
     (let [a (make-bloom 32 4)
 	  b (make-bloom 64 4)]
       (is (thrown? Exception (union a b)))))
+  (testing "do union 3 filters with one element each"
+    (let [[a b c] (map #(add (make-bloom 32 4) %) (range 3))
+	  d (union a b c)]
+      (is (= [true true true] (map #(contains? d %) (range 3))))))
   (testing "remember elements from both sets"
     (let [a (make-bloom 32 4)
 	  b (make-bloom 32 4)]
