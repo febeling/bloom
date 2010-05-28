@@ -5,7 +5,7 @@
   (:refer-clojure :exclude [contains?]))
 
 ;; TODO (intersection a b)
-;; TODO (optimized-bloom element-count error-probability)
+;; TODO (make-optimized-bloom element-count error-probability)
 
 (def message-digest (MessageDigest/getInstance "SHA1"))
 
