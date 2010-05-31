@@ -66,9 +66,9 @@ elements N and number of hash functions K. K can be calculated."
 
 (defn indexes [s m k]
   (->> (range k)
-       (map #(str % s))
+       (map (fn [j] (str j s)))
        (map hashnum)
-       (map #(mod % m))))
+       (map (fn [l] (mod l m)))))
 
 (defn- add* [bloom x]
   (let [s (pr-str x)
