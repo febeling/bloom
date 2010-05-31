@@ -8,11 +8,11 @@
 ;; TODO (make-optimized-bloom element-count error-probability)
 ;; TODO add element count
 
-(def message-digest (MessageDigest/getInstance "SHA1"))
+(set! *warn-on-reflection* true)
 
 (def
  #^{:tag Charset}
- charset (Charset/forName "UTF-8"))
+ charset (Charset/forName "US-ASCII"))
 
 (defn optimal-k
   "Optimal number K of hash functions for Bloom filter of bit size M
@@ -36,7 +36,8 @@ elements N and number of hash functions K. K can be calculated."
   (atom {:m m :k k :f (make-array Byte/TYPE (byte-size m))}))
 
 (defn abit-array-pos [byte-array i]
-  (dec (- (alength byte-array) (int (/ i 8)))))
+  (- (dec (alength byte-array))
+     (int (/ i 8))))
 
 (defn abit-bit-pos [byte-array i]
   (rem i 8))
@@ -65,7 +66,7 @@ elements N and number of hash functions K. K can be calculated."
 
 (defn indexes [s m k]
   (->> (range k)
-       (map #(str s %))
+       (map #(str % s))
        (map hashnum)
        (map #(mod % m))))
 
@@ -108,8 +109,11 @@ elements N and number of hash functions K. K can be calculated."
 	a-bs (:f @a)
 	b-bs (:f @b)]
     (doseq [n (range (alength (:f @a)))]
-      (aset-byte u-bs n (bit-or (aget a-bs n) (aget b-bs n))))
+      (aset-byte u-bs n (bit-or #^Byte (aget #^bytes a-bs #^Integer n)
+				#^Byte (aget #^bytes b-bs #^Integer n))))
     (let [u (atom (assoc @a :f u-bs))]
       (if (empty? more)
 	u
 	(recur u (first more) (rest more))))))
+
+(set! *warn-on-reflection* false)
