@@ -88,7 +88,7 @@ elements N and number of hash functions K. K can be calculated."
 	m (get bf-map :m)
 	k (get bf-map :k)
 	f (get bf-map :f)]
-    (every? #(abit-test f %) (indexes s m k))))
+    (every? (fn [x] abit-test f x) (indexes s m k))))
 
 (defn pack [bloom]
   (assoc @bloom :f (into [] (:f @bloom))))
