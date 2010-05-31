@@ -84,7 +84,10 @@ elements N and number of hash functions K. K can be calculated."
 
 (defn contains? [bloom x]
   (let [s (pr-str x)
-	{:keys [m k f]} @bloom]
+	bf-map @bloom
+	m (get bf-map :m)
+	k (get bf-map :k)
+	f (get bf-map :f)]
     (every? #(abit-test f %) (indexes s m k))))
 
 (defn pack [bloom]
