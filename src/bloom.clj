@@ -59,9 +59,9 @@ elements N and number of hash functions K. K can be calculated."
        (map #(bit-and 0xff %))
        (reduce #(bit-or (bit-shift-left %1 8) %2) 0)))
 
-(defn hashnum [x]
-  (let [bs (.getBytes #^String x charset)]
-    (bytes->num (. #^MessageDigest message-digest digest bs))))
+;; cbuhash, see http://www.serve.net/buz/hash.adt/java.002.html
+(defn hashnum [s]
+  (Math/abs (long (reduce #(+ (bit-shift-left %1 2) %2) (.getBytes #^String s charset)))))
 
 (defn indexes [s m k]
   (->> (range k)
