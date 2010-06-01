@@ -1,5 +1,6 @@
 (ns bloom.benchmark
   (:require [bloom :as bf])
+  (:import (net.partow GeneralHashFunctionLibrary))
   (:import (java.util HashSet)))
 
 (defn benchmark
@@ -26,3 +27,19 @@ retrieving them with a hit rate of 0.05. (Error rate of 0.1%)"
 	 (let [lim (/ n 0.05)] ;; -> hit rate 0.05
 	   (time (doseq [x (range n)]
 		   (.contains hs (Math/round (rand lim))))))))))
+
+(defn hashes []
+  (let [x 100000]
+    (dotimes [i 10]
+      (println "--- Round " i)
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary APHash "hello hash")))
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary BKDRHash "hello hash")))
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary BPHash "hello hash")))
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary DEKHash "hello hash")))
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary DJBHash "hello hash")))
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary ELFHash "hello hash")))
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary FNVHash "hello hash")))
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary JSHash "hello hash")))
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary PJWHash "hello hash")))
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary RSHash "hello hash")))
+      (time (dotimes [n x] (. GeneralHashFunctionLibrary SDBMHash "hello hash"))))))

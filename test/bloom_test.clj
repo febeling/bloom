@@ -80,6 +80,9 @@
        20 "world"
        20 " "))
 
+(deftest hashfunctions-test
+  (is GeneralHashFunctionLibrary))
+
 (deftest indexes-test
   (are [x ps] (= x (apply indexes ps))
        [9 4 2] ["a" 10 3]
