@@ -1,7 +1,6 @@
 (ns bloom
-  (:import java.security.MessageDigest)
-  (:import java.nio.charset.Charset)
   (:use [clojure.contrib.except :only [throw-if-not]])
+  (:import net.partow.GeneralHashFunctionLibrary)
   (:refer-clojure :exclude [contains?]))
 
 ;; TODO (intersection a b)
@@ -9,10 +8,6 @@
 ;; TODO add element count
 
 (set! *warn-on-reflection* true)
-
-(def
- #^{:tag Charset}
- charset (Charset/forName "US-ASCII"))
 
 (defn optimal-k
   "Optimal number K of hash functions for Bloom filter of bit size M
@@ -60,22 +55,23 @@ elements N and number of hash functions K. K can be calculated."
        (map #(bit-and 0xff %))
        (reduce #(bit-or (bit-shift-left %1 8) %2) 0)))
 
-;; cbuhash, see http://www.serve.net/buz/hash.adt/java.002.html
-;; (defn hashnum [s]
-;;   (Math/abs (long (reduce #(+ (bit-shift-left %1 2) %2) (.getBytes #^String s charset)))))
-
-(def message-digest (MessageDigest/getInstance "SHA1"))
-(defn hashnum [x]
-  (let [bs (.getBytes #^String x charset)]
-    (. #^MessageDigest message-digest digest bs)))
+(def hash-functions
+     [(fn [s] (. GeneralHashFunctionLibrary APHash s))
+      (fn [s] (. GeneralHashFunctionLibrary BKDRHash s))
+      (fn [s] (. GeneralHashFunctionLibrary BPHash s))
+      (fn [s] (. GeneralHashFunctionLibrary DEKHash s))
+      (fn [s] (. GeneralHashFunctionLibrary DJBHash s))
+      (fn [s] (. GeneralHashFunctionLibrary ELFHash s))
+      (fn [s] (. GeneralHashFunctionLibrary FNVHash s))
+      (fn [s] (. GeneralHashFunctionLibrary JSHash s))
+      (fn [s] (. GeneralHashFunctionLibrary PJWHash s))
+      (fn [s] (. GeneralHashFunctionLibrary RSHash s))
+      (fn [s] (. GeneralHashFunctionLibrary SDBMHash s))])
 
 (defn indexes [s m k]
-  (let [sha1 (hashnum s)]
-    (->> (range k)
-	 (map #(reduce (fn [a e]
-			 (rem (bit-or (bit-shift-left a 8) (bit-and 0xff e))
-			      m))
-		       0 (take 4 (drop (* % 4) sha1)))))))
+  (->> (take k hash-functions)
+       (map (fn [f] (f s)))
+       (map (fn [h] (rem (Math/abs #^Long h) m)))))
 
 (defn- add* [bloom x]
   (let [s (pr-str x)

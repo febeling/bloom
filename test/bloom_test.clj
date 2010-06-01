@@ -1,6 +1,7 @@
 (ns bloom-test
   (:use [bloom] :reload-all)
   (:use [clojure.test])
+  (:import net.partow.GeneralHashFunctionLibrary)
   (:refer-clojure :exclude [contains?]))
 
 (deftest optimal-k-test
@@ -71,22 +72,13 @@
  	     false 7
  	     false 9)))
 
-(deftest hashnum-test
-  (are [x s] (let [hsh (hashnum s)]
-	       (and (= x (count hsh))
-		    (every? #(<= % 127) hsh)
-		    (every? #(>= % -128) hsh)))
-       20 "hello"
-       20 "world"
-       20 " "))
-
 (deftest hashfunctions-test
   (is GeneralHashFunctionLibrary))
 
 (deftest indexes-test
   (are [x ps] (= x (apply indexes ps))
-       [9 4 2] ["a" 10 3]
-       [98 61 89 89 68] ["b" 100 5])
+       [9 1 1] ["a" 12 3]
+       [24 98 98 66 71] ["b" 100 5])
   (let [m 20
 	k 5]
     (is (every? #(< % m) (indexes "x" m k)))
