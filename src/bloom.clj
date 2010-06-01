@@ -61,14 +61,21 @@ elements N and number of hash functions K. K can be calculated."
        (reduce #(bit-or (bit-shift-left %1 8) %2) 0)))
 
 ;; cbuhash, see http://www.serve.net/buz/hash.adt/java.002.html
-(defn hashnum [s]
-  (Math/abs (long (reduce #(+ (bit-shift-left %1 2) %2) (.getBytes #^String s charset)))))
+;; (defn hashnum [s]
+;;   (Math/abs (long (reduce #(+ (bit-shift-left %1 2) %2) (.getBytes #^String s charset)))))
+
+(def message-digest (MessageDigest/getInstance "SHA1"))
+(defn hashnum [x]
+  (let [bs (.getBytes #^String x charset)]
+    (. #^MessageDigest message-digest digest bs)))
 
 (defn indexes [s m k]
-  (->> (range k)
-       (map (fn [j] (str j s)))
-       (map hashnum)
-       (map (fn [l] (mod l m)))))
+  (let [sha1 (hashnum s)]
+    (->> (range k)
+	 (map #(reduce (fn [a e]
+			 (rem (bit-or (bit-shift-left a 8) (bit-and 0xff e))
+			      m))
+		       0 (take 4 (drop (* % 4) sha1)))))))
 
 (defn- add* [bloom x]
   (let [s (pr-str x)

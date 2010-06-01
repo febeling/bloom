@@ -72,15 +72,18 @@
  	     false 9)))
 
 (deftest hashnum-test
-  (are [x s] (= x (hashnum s))
-       35359 "hello"
-       39924 "world"
-       32 " "))
+  (are [x s] (let [hsh (hashnum s)]
+	       (and (= x (count hsh))
+		    (every? #(<= % 127) hsh)
+		    (every? #(>= % -128) hsh)))
+       20 "hello"
+       20 "world"
+       20 " "))
 
 (deftest indexes-test
   (are [x ps] (= x (apply indexes ps))
-       [9 3 7] ["a" 10 3]
-       [90 94 98 2 6] ["b" 100 5])
+       [9 4 2] ["a" 10 3]
+       [98 61 89 89 68] ["b" 100 5])
   (let [m 20
 	k 5]
     (is (every? #(< % m) (indexes "x" m k)))
@@ -93,7 +96,7 @@
     (is (add b "b"))))
 
 (deftest add-multiple-test
-  (let [b (make-bloom 48 3)]
+  (let [b (make-bloom 50 3)]
     (is (reduce add b [1 2 3 4 5]))
     (is (every? identity (map #(contains? b %) [1 2 3 4 5])))
     (is (not-any? identity (map #(contains? b %) [6 7 8 9 10])))))
