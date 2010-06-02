@@ -46,32 +46,15 @@ elements N and number of hash functions K. K can be calculated."
     byte-array))
 
 (defn abit-test [byte-array i]
-  (let [apos (abit-array-pos byte-array i)
-	bpos (abit-bit-pos byte-array i)]
-    (bit-test (aget #^bytes byte-array #^Integer apos) bpos)))
+  (. GeneralHashFunctionLibrary isBitSet byte-array i))
 
 (defn bytes->num [bs]
   (->> bs
        (map #(bit-and 0xff %))
        (reduce #(bit-or (bit-shift-left %1 8) %2) 0)))
 
-(def hash-functions
-     [(fn [s] (. GeneralHashFunctionLibrary APHash s))
-      (fn [s] (. GeneralHashFunctionLibrary BKDRHash s))
-      (fn [s] (. GeneralHashFunctionLibrary BPHash s))
-      (fn [s] (. GeneralHashFunctionLibrary DEKHash s))
-      (fn [s] (. GeneralHashFunctionLibrary DJBHash s))
-      (fn [s] (. GeneralHashFunctionLibrary ELFHash s))
-      (fn [s] (. GeneralHashFunctionLibrary FNVHash s))
-      (fn [s] (. GeneralHashFunctionLibrary JSHash s))
-      (fn [s] (. GeneralHashFunctionLibrary PJWHash s))
-      (fn [s] (. GeneralHashFunctionLibrary RSHash s))
-      (fn [s] (. GeneralHashFunctionLibrary SDBMHash s))])
-
 (defn indexes [s m k]
-  (->> (take k hash-functions)
-       (map (fn [f] (f s)))
-       (map (fn [h] (rem (Math/abs #^Long h) m)))))
+  (. GeneralHashFunctionLibrary indexes s m k))
 
 (defn- add* [bloom x]
   (let [s (pr-str x)
@@ -91,7 +74,9 @@ elements N and number of hash functions K. K can be calculated."
 	m (get bf-map :m)
 	k (get bf-map :k)
 	f (get bf-map :f)]
-    (every? (fn [n] (abit-test f n)) (indexes s m k))))
+    (. GeneralHashFunctionLibrary contains f s m k)
+;;    (every? (fn [n] (abit-test f n)) (indexes s m k))
+    ))
 
 (defn pack [bloom]
   (assoc @bloom :f (into [] (:f @bloom))))

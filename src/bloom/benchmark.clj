@@ -10,7 +10,7 @@ retrieving them with a hit rate of 0.05. (Error rate of 0.1%)"
   ([n]
      (println (format "Insert %,d entries" n))
      (let [m (* n 100)
-	   k 2
+	   k 4
 	   bt (bf/make-bloom m k)]
 
        (println (format "bloom filter k=%d" k))

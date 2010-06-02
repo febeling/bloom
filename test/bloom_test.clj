@@ -63,10 +63,10 @@
 	(are [x y] (is (= x (abit-test ba y)))
 	     true 0
  	     true 2
-	     false 1
  	     true 4
  	     true 8
  	     true 10
+	     false 1
  	     false 3
  	     false 5
  	     false 7
@@ -76,9 +76,9 @@
   (is GeneralHashFunctionLibrary))
 
 (deftest indexes-test
-  (are [x ps] (= x (apply indexes ps))
-       [9 1 1] ["a" 12 3]
-       [24 98 98 66 71] ["b" 100 5])
+  (are [x ps] (= x (into [] (apply indexes ps)))
+       [11 1 1] ["a" 12 3]
+       [84 98 98 66 71] ["b" 100 5])
   (let [m 20
 	k 5]
     (is (every? #(< % m) (indexes "x" m k)))
