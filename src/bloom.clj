@@ -24,11 +24,13 @@ and number of elements N
 (defn byte-size [bits]
   (int (Math/ceil (float (/ bits 8)))))
 
+(defstruct bloomfilter :m :k :f)
+
 (defn make-bloom
   "Create a Bloom filter with bit size M, number of (expected)
 elements N and number of hash functions K. K can be calculated."
   [m k]
-  (atom {:m m :k k :f (make-array Byte/TYPE (byte-size m))}))
+  (atom (struct bloomfilter m k (make-array Byte/TYPE (byte-size m)))))
 
 (defn abit-array-pos [byte-array i]
   (- (dec (alength byte-array))
@@ -56,21 +58,19 @@ elements N and number of hash functions K. K can be calculated."
 (defn indexes [s m k]
   (. GeneralHashFunctionLibrary indexes s m k))
 
-(defn- add* [bloom x]
-  (let [s (pr-str x)
-	{:keys [m k f]} bloom]
+(defn- add* [bloom s]
+  (let [{:keys [m k f]} bloom]
     (reduce (fn [bs n] (abit-set bs n) bs)
 	    f (indexes s m k))
     bloom))
 
-(defn add [bloom x]
+(defn add [bloom #^String x]
   "Change BLOOM to contain X and return it."
   (swap! bloom add* x)
   bloom)
 
-(defn contains? [bloom x]
-  (let [s (pr-str x)
-	bf-map @bloom
+(defn contains? [bloom #^String s]
+  (let [bf-map @bloom
 	m (get bf-map :m)
 	k (get bf-map :k)
 	f (get bf-map :f)]
@@ -83,7 +83,7 @@ elements N and number of hash functions K. K can be calculated."
 
 (defn unpack [bloom]
   (let [f (into-array Byte/TYPE (map byte (:f bloom)))]
-    (assoc bloom :f f)))
+    (into (struct-map bloomfilter) (assoc bloom :f f))))
 
 (defn serialize [bloom]
   (pr-str (pack bloom)))

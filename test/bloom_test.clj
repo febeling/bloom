@@ -92,9 +92,9 @@
 
 (deftest add-multiple-test
   (let [b (make-bloom 50 3)]
-    (is (reduce add b [1 2 3 4 5]))
-    (is (every? identity (map #(contains? b %) [1 2 3 4 5])))
-    (is (not-any? identity (map #(contains? b %) [6 7 8 9 10])))))
+    (is (reduce add b ["1" "2" "3" "4" "5"]))
+    (is (every? identity (map #(contains? b %) ["1" "2" "3" "4" "5"])))
+    (is (not-any? identity (map #(contains? b %) ["6" "7" "8" "9" "10"])))))
 
 (deftest contains?-test
   (let [b (make-bloom 64 4)]
@@ -122,7 +122,7 @@
 
 (deftest serialize-deserialize-test
   (let [bf (make-bloom 1000000 5)
-	_ (-> bf (add 1) (add 2) (add 3) (add 4))
+	_ (-> bf (add "1") (add "2") (add "3") (add "4"))
 	bf-serialized (deserialize (serialize bf))]
     (is (= (:m @bf) (:m @bf-serialized)))
     (is (= (:k @bf) (:k @bf-serialized)))
@@ -139,15 +139,15 @@
 	  b (make-bloom 64 4)]
       (is (thrown? Exception (union a b)))))
   (testing "do union 3 filters with one element each"
-    (let [[a b c] (map #(add (make-bloom 32 4) %) (range 3))
+    (let [[a b c] (map #(add (make-bloom 32 4) %) (map str (range 3)))
 	  d (union a b c)]
-      (is (= [true true true] (map #(contains? d %) (range 3))))))
+      (is (= [true true true] (map #(contains? d %) (map str (range 3)))))))
   (testing "remember elements from both sets"
     (let [a (make-bloom 32 4)
 	  b (make-bloom 32 4)]
-      (add a 1)
-      (add b 2)
+      (add a "1")
+      (add b "2")
       (let [u (union a b)]
-	(is (contains? u 1))
-	(is (contains? u 2))
-	(is (not (contains? u 3)))))))
+	(is (contains? u "1"))
+	(is (contains? u "2"))
+	(is (not (contains? u "3")))))))
