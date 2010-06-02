@@ -32,11 +32,11 @@ public class GeneralHashFunctionLibrary
 	indexes[3] = (DEKHash(s) & MASK) % m;  if(k == 4) return indexes;
 	indexes[4] = (DJBHash(s) & MASK) % m;  if(k == 5) return indexes;
 	// ELFHash
-	// FNVHash
 	// JSHash
 	// PJWHash
 	// RSHash
 	// SDBMHash
+	// FNVHash
 	throw new RuntimeException("k > 5 not supported yet");
     }
 
