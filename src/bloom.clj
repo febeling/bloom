@@ -39,12 +39,47 @@ elements N and number of hash functions K. K can be calculated."
 (defn abit-bit-pos [byte-array i]
   (rem i 8))
 
+;; CLOJURE 1.1
+
+;; (defn byte
+;;   "Coerce to byte"
+;;   {:tag Byte
+;;    :inline (fn [x] `(. clojure.lang.RT (byteCast ~x)))}
+;;   [#^Number x] (. x (byteValue)))
+
 (defn abit-set [byte-array i]
   (let [apos (abit-array-pos byte-array i)
 	bpos (abit-bit-pos byte-array i)]
     (aset-byte byte-array
 	       apos
-	       (-> #^bytes byte-array (aget #^Integer apos) (bit-set bpos) byte))
+	       (-> #^bytes byte-array
+                   (aget #^Integer apos)
+                   (bit-set bpos)
+                   byte))
+    byte-array))
+
+;; CLOJURE 1.2
+
+;; (defn byte
+;;   "Coerce to byte"
+;;   {:tag Byte
+;;    :inline (fn [x] `(. clojure.lang.RT (byteCast ~x)))
+;;    :added "1.0"}
+;;   [^Number x] (clojure.lang.RT/byteCast x))
+
+(defn byte-1
+  "Coerce to byte"
+  [#^Number x] (. x (byteValue)))
+
+(defn abit-set [byte-array i]
+  (let [apos (abit-array-pos byte-array i)
+	bpos (abit-bit-pos byte-array i)]
+    (aset-byte byte-array
+	       apos
+	       (-> #^bytes byte-array
+                   (aget #^Integer apos)
+                   (bit-set bpos)
+                   (byte-1)))
     byte-array))
 
 (defn abit-test [byte-array i]

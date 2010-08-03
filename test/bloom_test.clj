@@ -32,7 +32,7 @@
     (is (= 13 (alength (:f bf))))))
 
 (defn bit-str [bs]
-  (Long/toString (bytes->num (byte-array (map byte bs))) 2))
+  (Long/toString (bytes->num (byte-array (map byte-1 bs))) 2))
 
 (deftest bytes->num-test
   (are [x y] (= x (bit-str y))
