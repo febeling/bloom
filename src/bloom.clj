@@ -7,8 +7,6 @@
 ;; TODO (make-optimized-bloom element-count error-probability)
 ;; TODO add element count
 
-(set! *warn-on-reflection* true)
-
 (defn optimal-k
   "Optimal number K of hash functions for Bloom filter of bit size M
 and number of elements N
@@ -141,5 +139,3 @@ elements N and number of hash functions K. K can be calculated."
       (if (empty? more)
 	u
 	(recur u (first more) (rest more))))))
-
-(set! *warn-on-reflection* false)
