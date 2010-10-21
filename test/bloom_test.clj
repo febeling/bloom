@@ -1,7 +1,6 @@
 (ns bloom-test
   (:use [bloom] :reload-all)
   (:use [clojure.test])
-  (:import net.partow.GeneralHashFunctionLibrary)
   (:refer-clojure :exclude [contains?]))
 
 (deftest optimal-k-test
@@ -71,9 +70,6 @@
  	     false 5
  	     false 7
  	     false 9)))
-
-(deftest hashfunctions-test
-  (is GeneralHashFunctionLibrary))
 
 (deftest indexes-test
   (are [x ps] (= x (into [] (apply indexes ps)))

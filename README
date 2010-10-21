@@ -1,9 +1,9 @@
 # bloom
 
 This is a Bloom filter implementation in Clojure. A Bloom filter is a
-space-efficient set algorithm, which allows false positives. The rate
-of false positives can be contolled of the number of elements is known
-in advance.
+space-efficient logical set algorithm, which allows false
+positives. The rate of false positives can be controlled, if the
+number of elements is known in advance by using more space.
 
 
 ## Usage
@@ -56,3 +56,10 @@ Eclipse license. See epl-v10.html.
 4 http://code.google.com/p/java-bloomfilter/
 5 http://www.fatvat.co.uk/2009/02/bloom-filters.html
 6 http://svn.apache.org/viewvc/hadoop/common/branches/branch-0.20/src/core/org/apache/hadoop/util/bloom/BloomFilter.java?revision=787134&view=markup
+
+TODO
+
+- (intersection a b)
+- (make-optimized-bloom element-count error-probability)
+- add element count
+

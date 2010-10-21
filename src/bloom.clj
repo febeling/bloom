@@ -1,11 +1,7 @@
 (ns bloom
   (:use [clojure.contrib.except :only [throw-if-not]])
-  (:import net.partow.GeneralHashFunctionLibrary)
+  (:import com.github.febeling.NumericHelpers)
   (:refer-clojure :exclude [contains?]))
-
-;; TODO (intersection a b)
-;; TODO (make-optimized-bloom element-count error-probability)
-;; TODO add element count
 
 (defn optimal-k
   "Optimal number K of hash functions for Bloom filter of bit size M
@@ -49,7 +45,7 @@ elements N and number of hash functions K. K can be calculated."
     byte-array))
 
 (defn abit-test [byte-array i]
-  (. GeneralHashFunctionLibrary isBitSet byte-array i))
+  (. NumericHelpers isBitSet byte-array i))
 
 (defn bytes->num [bs]
   (->> bs
@@ -57,7 +53,7 @@ elements N and number of hash functions K. K can be calculated."
        (reduce #(bit-or (bit-shift-left %1 8) %2) 0)))
 
 (defn indexes [s m k]
-  (. GeneralHashFunctionLibrary indexes s m k))
+  (. NumericHelpers indexes s m k))
 
 (defn- add* [bloom s]
   (let [{:keys [m k f]} bloom]
@@ -75,9 +71,7 @@ elements N and number of hash functions K. K can be calculated."
 	m (get bf-map :m)
 	k (get bf-map :k)
 	f (get bf-map :f)]
-    (. GeneralHashFunctionLibrary contains f s m k)
-;;    (every? (fn [n] (abit-test f n)) (indexes s m k))
-    ))
+    (. NumericHelpers contains f s m k)))
 
 (defn pack [bloom]
   (assoc @bloom :f (into [] (:f @bloom))))
