@@ -1,5 +1,4 @@
 (ns bloom
-  (:use [clojure.contrib.except :only [throw-if-not]])
   (:import com.github.febeling.NumericHelpers)
   (:refer-clojure :exclude [contains?]))
 
@@ -90,7 +89,8 @@ elements N and number of hash functions K. K can be calculated."
   (and (= (:m @a) (:m @b)) (= (:k @a) (:k @b))))
 
 (defn union [a b & more]
-  (throw-if-not (match? a b) "Bloom filters different, cannot union")
+  (if-not (match? a b)
+    (throw (Exception. "Bloom filters different, cannot union")))
   (let [u-bs (make-array Byte/TYPE (alength (:f @a)))
 	a-bs (:f @a)
 	b-bs (:f @b)]
